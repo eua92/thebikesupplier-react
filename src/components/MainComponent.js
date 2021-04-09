@@ -1,27 +1,32 @@
-import React from 'react';
-import Home from './HomeComponent';
-import Bikes from './BikesComponent';
-import Rent from './RentComponent';
-import Repair from './RepairComponent';
-import Tours from './ToursComponent';
-import About from './AboutComponent';
-import Contact from './ContactComponents';
-import Navigation from './NavComponent';
-import SignUp from './SignUpComponent';
-import Footer from './FooterComponent';
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
-import { ROADBIKES } from '../shared/roadBikes';
-import { MOUNTAINBIKES } from '../shared/mountainBikes';
-import { ELECTRICBIKES } from '../shared/electricBikes';
-import { CHILDRENBIKES } from '../shared/childrenBikes';
-import LoginModal from './LoginModalComponent';
-import WishListModal from './WishListModalComponent';
-import BasketModal from './BasketModalComponent';
-import QuickviewModal from './QuickviewModalComponent';
+import React from "react";
+import Home from "./HomeComponent";
+import Bikes from "./BikesComponent";
+import Rent from "./RentComponent";
+import Repair from "./RepairComponent";
+import Tours from "./ToursComponent";
+import About from "./AboutComponent";
+import Contact from "./ContactComponents";
+import Navigation from "./NavComponent";
+import SignUp from "./SignUpComponent";
+import Footer from "./FooterComponent";
+import {
+    BrowserRouter as Router,
+    Switch,
+    Route,
+    Redirect
+} from "react-router-dom";
+import { ROADBIKES } from "../shared/roadBikes";
+import { MOUNTAINBIKES } from "../shared/mountainBikes";
+import { ELECTRICBIKES } from "../shared/electricBikes";
+import { CHILDRENBIKES } from "../shared/childrenBikes";
+import LoginModal from "./LoginModalComponent";
+import WishListModal from "./WishListModalComponent";
+import BasketModal from "./BasketModalComponent";
+import QuickviewModal from "./QuickviewModalComponent";
 
 class Main extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             roadBikes: ROADBIKES,
             mountainBikes: MOUNTAINBIKES,
@@ -41,11 +46,12 @@ class Main extends React.Component {
             isAccountOpen: false,
 
             isQuickviewModalOpen: false,
-            quickviewImage: '',
-            quickviewTitle: '',
+            quickviewImage: "",
+            quickviewTitle: "",
 
-            basketProducts: []
-        }
+            basketProducts: [],
+            totalPrice: 0
+        };
         this.toggleRoadBikes = this.toggleRoadBikes.bind(this);
         this.toggleMountainBikes = this.toggleMountainBikes.bind(this);
         this.toggleElectricBikes = this.toggleElectricBikes.bind(this);
@@ -63,6 +69,8 @@ class Main extends React.Component {
         this.quickview = this.quickview.bind(this);
 
         this.addProduct = this.addProduct.bind(this);
+        this.removeProduct = this.removeProduct.bind(this);
+        this.calculateTotalPrice = this.calculateTotalPrice.bind(this);
     }
 
     toggleRoadBikes() {
@@ -74,19 +82,19 @@ class Main extends React.Component {
     toggleMountainBikes() {
         this.setState({
             isMountainBikesOpen: !this.state.isMountainBikesOpen
-        })
+        });
     }
 
     toggleElectricBikes() {
         this.setState({
             isElectricBikesOpen: !this.state.isElectricBikesOpen
-        })
+        });
     }
 
     toggleChildrenBikes() {
         this.setState({
             isChildrenBikesOpen: !this.state.isChildrenBikesOpen
-        })
+        });
     }
 
     toggleNav() {
@@ -116,13 +124,13 @@ class Main extends React.Component {
     toggleLinks() {
         this.setState({
             areLinksOpen: !this.state.areLinksOpen
-        })
+        });
     }
 
     toggleAccount() {
         this.setState({
             isAccountOpen: !this.state.isAccountOpen
-        })
+        });
     }
 
     toggleQuickviewModal() {
@@ -135,7 +143,7 @@ class Main extends React.Component {
         this.setState({
             quickviewImage: image,
             quickviewTitle: name
-        })
+        });
     }
 
     addProduct(id, image, name, price) {
@@ -145,18 +153,36 @@ class Main extends React.Component {
             image: image,
             name: name,
             price: price
-        })
+        });
         this.setState({
             basketProducts: tempProducts
-        })
+        });
+    }
+
+    removeProduct(id) {
+        let tempProducts = this.state.basketProducts.filter(
+            (item) => item.id !== id
+        );
+        this.setState({
+            basketProducts: tempProducts
+        });
+    }
+
+    calculateTotalPrice() {
+        let total = 0;
+        for (let i = 0; i < this.state.basketProducts.length; i++) {
+            total += this.state.basketProducts[i].price;
+        }
+        this.setState({
+            totalPrice: total
+        });
     }
 
     render() {
+        console.log(this.state.totalPrice);
         const HomePage = () => {
-            return (
-                <Home />
-            )
-        }
+            return <Home />;
+        };
 
         return (
             <React.Fragment>
@@ -170,30 +196,57 @@ class Main extends React.Component {
                         toggleWishListModal={this.toggleWishListModal}
                         isBasketModalOpen={this.state.isBasketModalOpen}
                         toggleBasketModal={this.toggleBasketModal}
+                        productsQuantity={this.state.basketProducts.length}
                     />
                     <Switch>
                         <Route path="/home" component={HomePage} />
-                        <Route path="/bikes" component={() =>
-                            <Bikes
-                                roadBikes={this.state.roadBikes}
-                                mountainBikes={this.state.mountainBikes}
-                                electricBikes={this.state.electricBikes}
-                                childrenBikes={this.state.childrenBikes}
-                                isRoadBikesOpen={this.state.isRoadBikesOpen}
-                                toggleRoadBikes={this.toggleRoadBikes}
-                                isMountainBikesOpen={this.state.isMountainBikesOpen}
-                                toggleMountainBikes={this.toggleMountainBikes}
-                                isElectricBikesOpen={this.state.isElectricBikesOpen}
-                                toggleElectricBikes={this.toggleElectricBikes}
-                                isChildrenBikesOpen={this.state.isChildrenBikesOpen}
-                                toggleChildrenBikes={this.toggleChildrenBikes}
-                                isWishListModalOpen={this.state.isWishListModalOpen}
-                                toggleWishListModal={this.toggleWishListModal}
-                                isQuickviewModalOpen={this.state.isQuickviewModalOpen}
-                                toggleQuickviewModal={this.toggleQuickviewModal}
-                                quickview={this.quickview}
-                                addProduct={this.addProduct}
-                            />}
+                        <Route
+                            path="/bikes"
+                            component={() => (
+                                <Bikes
+                                    roadBikes={this.state.roadBikes}
+                                    mountainBikes={this.state.mountainBikes}
+                                    electricBikes={this.state.electricBikes}
+                                    childrenBikes={this.state.childrenBikes}
+                                    isRoadBikesOpen={this.state.isRoadBikesOpen}
+                                    toggleRoadBikes={this.toggleRoadBikes}
+                                    isMountainBikesOpen={
+                                        this.state.isMountainBikesOpen
+                                    }
+                                    toggleMountainBikes={
+                                        this.toggleMountainBikes
+                                    }
+                                    isElectricBikesOpen={
+                                        this.state.isElectricBikesOpen
+                                    }
+                                    toggleElectricBikes={
+                                        this.toggleElectricBikes
+                                    }
+                                    isChildrenBikesOpen={
+                                        this.state.isChildrenBikesOpen
+                                    }
+                                    toggleChildrenBikes={
+                                        this.toggleChildrenBikes
+                                    }
+                                    isWishListModalOpen={
+                                        this.state.isWishListModalOpen
+                                    }
+                                    toggleWishListModal={
+                                        this.toggleWishListModal
+                                    }
+                                    isQuickviewModalOpen={
+                                        this.state.isQuickviewModalOpen
+                                    }
+                                    toggleQuickviewModal={
+                                        this.toggleQuickviewModal
+                                    }
+                                    quickview={this.quickview}
+                                    addProduct={this.addProduct}
+                                    calculateTotalPrice={
+                                        this.calculateTotalPrice
+                                    }
+                                />
+                            )}
                         />
                         <Route path="/rent" component={() => <Rent />} />
                         <Route path="/repair" component={() => <Repair />} />
@@ -227,6 +280,9 @@ class Main extends React.Component {
                         isBasketModalOpen={this.state.isBasketModalOpen}
                         toggleBasketModal={this.toggleBasketModal}
                         products={this.state.basketProducts}
+                        removeProduct={this.removeProduct}
+                        totalPrice={this.state.totalPrice}
+                        calculateTotalPrice={this.calculateTotalPrice}
                     />
                     <QuickviewModal
                         isQuickviewModalOpen={this.state.isQuickviewModalOpen}
